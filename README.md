@@ -15,7 +15,7 @@ $ meteor
 By default, app is running on 3000 port and MongoDB is running on 3001.
 
 On this step, you should have data in DB. If not, you can execute import_data.sh, if you are running on 3000 port.
-In other case use this command:
+In other case use these commands:
 
 mongoimport -h localhost:3001 --db meteor --collection builds --type csv --file session_history.csv --headerline
 
