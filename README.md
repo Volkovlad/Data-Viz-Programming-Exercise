@@ -19,6 +19,8 @@ In other case use this command:
 
 mongoimport -h localhost:3001 --db meteor --collection builds --type csv --file session_history.csv --headerline
 
+mongo localhost:3001/meteor --eval "db.builds.find().forEach(function(doc){doc.created_at = new ISODate(doc.created_at);db.builds.save(doc)});"
+
 -h = the host (or server) name.
 --port = specifies the port on the host that the MongoDB database is listening on. By default, Meteor uses port 3000 so we use 3001 for the Mongo db.
 --db	= the name of your database, in this case, meteor.
