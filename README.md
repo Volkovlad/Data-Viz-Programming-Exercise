@@ -36,5 +36,7 @@ In my opinion, it is a good idea to give control to user. So, user set 'Acceptab
 
 
 Tested on:
+
 Linux Mint 17.2 Cinnamon 32-bit
+
 Chromium Version 45.0.2454.101 Built on Ubuntu 14.04, running on LinuxMint 17.2
