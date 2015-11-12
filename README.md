@@ -33,3 +33,8 @@ In the above, my collection is called ‘builds’.
 Abnormal number of failing builds.
 
 In my opinion, it is a good idea to give control to user. So, user set 'Acceptable Percent Of Failing Builds'. 
+
+
+Tested on:
+Linux Mint 17.2 Cinnamon 32-bit
+Chromium Version 45.0.2454.101 Built on Ubuntu 14.04, running on LinuxMint 17.2
