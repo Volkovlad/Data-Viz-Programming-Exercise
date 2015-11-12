@@ -1,0 +1,30 @@
+<template name="stackedChart">
+	<div class="row">
+	    <div class="col-md-3">
+	        <div class="form-group">
+	  			<div class="input-group start-date">
+	    			<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+	    			<input class="set-start-date form-control" type="text" placeholder="Start Date"/>
+	  			</div>
+	  			<div class="tip">Tip: first date in DB is <strong>2014-08-11</strong></div>
+			</div>
+		</div>
+	    <div class="col-md-3">
+	        <div class="form-group">
+				<div class="input-group end-date">
+			    	<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+			    	<input class="set-end-date form-control" type="text" placeholder="End Date"/>
+			  	</div>
+		  	</div>
+	  	</div>
+	  	<div class="col-md-3">
+	  		<input type="text" id='abnormal-percent-slider' class="slider" value="" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="0">
+	  		<label for='abnormal-percent-slider'>Acceptable Percent Of Failing Builds</label>
+	  	</div>
+	  	<div class="col-md-3">
+	  		<button type="button" class="btn btn-primary build-chart">Build Chart</button>
+	  	</div>
+  	</div>
+  	
+	<div id="stacked-chart"></div>
+</template>
