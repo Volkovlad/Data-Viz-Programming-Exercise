@@ -1,36 +1,52 @@
 var buildChart = function(startDate, endDate, abnormalPercent) {
     var chart, createdAt, dates, uniqDates, createArrayForChart,
-        testPassed=[],testFailed=[], passed=[], failed=[], data=[],
-        all = Builds.find({
-            'summary_status':{
-                $in:['passed','failed']
-            },
-            'created_at' : { 
-                $gte : startDate, 
-                $lt: endDate    
-            }
-        }).fetch();
+        passedBuildsArrOfObj=[], failedBuildsArrOfObj=[], passedBuildsForChart=[],
+        failedBuildsForChart=[], data=[], allBuilds;
 
-    createdAt = _.pluck(all, 'created_at');
+    //get all builds, filtered by 'start' and 'end' date
+    //and by build status
+    //Array of objects
+    allBuilds = Builds.find({
+        'summary_status':{
+            $in:['passed','failed']
+        },
+        'created_at' : {
+            $gte : startDate,
+            $lt: endDate
+        }
+    }).fetch();
 
+    //get an Array of 'created_at' values
+    createdAt = _.pluck(allBuilds, 'created_at');
+
+    //get an Array of dates without time
     dates = _.map(createdAt, function(date){  
         var d = moment(date).toISOString().split('T');
         return d[0];
     });
 
+    //get an Array of unique dates for building chart (used as 'ticks')
     uniqDates = _.uniq(dates);
 
     createArrayForChart = function(obj, arrayOfObjects, arrayForChart){
         if(arrayOfObjects.length !== 0 && moment(_.last(arrayOfObjects).created).isSame(obj.created) ){
+            // increase value
             _.last(arrayForChart)[0]+=1;
         } else {
+            // find position where it should be rendered
             var index = _.indexOf(uniqDates, obj.created);
+
+            //push object into Array for 'record keeping'
             arrayOfObjects.push(obj);
+
+            // index+1 because we don't have 'zero' position
             arrayForChart.push([obj.count, index+1])
         }
-    }
-    _.each(all, function(build){
+    };
+    _.each(allBuilds, function(build){
         var d = moment(build.created_at).toISOString().split('T');
+
+        //create an object for params and for 'record keeping'
         var obj = {
             created: d[0], 
             status: build.summary_status, 
@@ -38,34 +54,38 @@ var buildChart = function(startDate, endDate, abnormalPercent) {
         };
 
         if(build.summary_status === 'failed'){
-            createArrayForChart(obj, testFailed, failed);
+            createArrayForChart(obj, failedBuildsArrOfObj, failedBuildsForChart);
         } else {
-            createArrayForChart(obj, testPassed, passed);
+            createArrayForChart(obj, passedBuildsArrOfObj, passedBuildsForChart);
         }
     });
 
-    if(passed.length > 0){
-        data.push(passed);
+    if(passedBuildsForChart.length > 0){
+        data.push(passedBuildsForChart);
     }
-    if(failed.length > 0){
-        data.push(failed);
 
-        _.each(failed, function(fail){
+    if(failedBuildsForChart.length > 0){
+        data.push(failedBuildsForChart);
+
+        _.each(failedBuildsForChart, function(fail){
             var buildCounts,
                 acceptable,
-                index = fail[1] - 1;
+                index = fail[1] - 1; //get real index, not position
 
-            _.each(passed, function(pass){
+            _.each(passedBuildsForChart, function(pass){
+                // if passed and failed builds are on the same position
+                // sum them to get builds per day
                 if(pass[1] === fail[1]){
                     //Count of builds per day
                     buildCounts = pass[0] + fail[0];
                 }
             });
-            
+
             if(!buildCounts){
                 buildCounts = fail[0]
             }
 
+            // count acceptable percentage of abnormal builds
             acceptable = buildCounts/100*abnormalPercent;
 
             if(acceptable < fail[0]){
@@ -81,13 +101,18 @@ var buildChart = function(startDate, endDate, abnormalPercent) {
         return;
     }
 
+    // data - Array of Arrays of Arrays:)
+    // consists of series of passed [[value, position], [value, position]]
+    // and failed builds [[value, position], [value, position]]
+    // finally [[[passedValue, position], [passedValue, position]],[[failedValue, position]]]
+    // Demonstrate example on http://www.jqplot.com/examples/barTest.php
     chart = $.jqplot('stacked-chart', data, {
         stackSeries: false,
         seriesDefaults:{
             renderer:$.jqplot.BarRenderer,
             shadowAngle: 135,
             rendererOptions: {
-                barDirection: 'horizontal',  
+                barDirection: 'horizontal'  
             },
             pointLabels: {
                 show: true, 
@@ -118,7 +143,7 @@ var buildChart = function(startDate, endDate, abnormalPercent) {
     });
 
     chart.replot();
-}
+};
 
 Template.stackedChart.onRendered( function () {
     this.$('.start-date').datetimepicker({
@@ -142,6 +167,7 @@ Template.stackedChart.events({
 
         if(startDate && endDate){
             start = new Date(startDate);
+            //small defect. Should add 23h 59m 59s
             end = new Date(moment(endDate, 'YYYY-MM-DD').add(1,'day'));
             buildChart(start, end, abnormalPercent);
         } else {
