@@ -15,9 +15,11 @@ $ meteor
 By default, app is running on 3000 port and MongoDB is running on 3001.
 
 On this step, you should have data in DB. If not, you can execute import_data.sh, if you are running on 3000 port.
-In other case use this command:
+In other case use these commands:
 
 mongoimport -h localhost:3001 --db meteor --collection builds --type csv --file session_history.csv --headerline
+
+mongo localhost:3001/meteor --eval "db.builds.find().forEach(function(doc){doc.created_at = new ISODate(doc.created_at);db.builds.save(doc)});"
 
 -h = the host (or server) name.
 --port = specifies the port on the host that the MongoDB database is listening on. By default, Meteor uses port 3000 so we use 3001 for the Mongo db.
@@ -33,3 +35,10 @@ In the above, my collection is called ‘builds’.
 Abnormal number of failing builds.
 
 In my opinion, it is a good idea to give control to user. So, user set 'Acceptable Percent Of Failing Builds'. 
+
+
+Tested on:
+
+Linux Mint 17.2 Cinnamon 32-bit
+
+Chromium Version 45.0.2454.101 Built on Ubuntu 14.04, running on LinuxMint 17.2
